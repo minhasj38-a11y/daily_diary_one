@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing Diary – Interactive Index</title>
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #111a2e;
+      --accent: #2f81f7;
+      --accent-soft: #1f6feb;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #0d1b3d, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 2rem 1rem 1.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      background: linear-gradient(90deg, #58a6ff, #2f81f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      margin-top: 0.6rem;
+      color: var(--muted);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .controls input {
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      border: none;
+      background: var(--card);
+      color: var(--text);
+      width: 260px;
+      font-size: 0.95rem;
+    }
+
+    .controls input::placeholder {
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.6rem;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #141f3b, var(--card));
+      border-radius: 18px;
+      padding: 1.4rem;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(47, 129, 247, 0.25), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    }
+
+    .card:hover::after {
+      opacity: 1;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.3rem;
+      color: #58a6ff;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin: 0.6rem 0 1.2rem;
+    }
+
+    .card button {
+      width: 100%;
+      padding: 0.65rem;
+      font-size: 0.95rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+
+    /* MODAL VIEWER */
+    .viewer {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 10, 25, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .viewer.active {
+      display: flex;
+    }
+
+    .viewer-box {
+      width: 90%;
+      height: 90%;
+      background: #0d152b;
+      border-radius: 20px;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      animation: zoomIn 0.3s ease;
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .viewer iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      border: none;
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.2s ease;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Phishing Daily Diary</h1>
+    <p>Interactive Cybersecurity Training Index • Jaskaran Minhas</p>
+  </header>
+
+  <div class="container">
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search day (e.g. 7, 12, 25)" />
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <footer>
+    © 2026 | Cybersecurity Phishing Training | Jaskaran Minhas
+  </footer>
+
+  <!-- PDF VIEWER MODAL -->
+  <div class="viewer" id="viewer">
+    <div class="viewer-box">
+      <button class="close-btn" onclick="closeViewer()">×</button>
+      <iframe id="pdfFrame"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const grid = document.getElementById("grid");
+    const search = document.getElementById("search");
+    const viewer = document.getElementById("viewer");
+    const pdfFrame = document.getElementById("pdfFrame");
+
+    const TOTAL_DAYS = 30;
+    let cards = [];
+
+    function buildGrid() {
+      grid.innerHTML = "";
+      cards = [];
+
+      for (let i = 1; i <= TOTAL_DAYS; i++) {
+        const day = String(i).padStart(2, "0");
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.day = i;
+
+        card.innerHTML = `
+          <h3>Day ${i}</h3>
+          <p>Phishing & Social Engineering Training</p>
+          <button onclick="openPDF('${day}')">View PDF</button>
+        `;
+
+        grid.appendChild(card);
+        cards.push(card);
+      }
+    }
+
+    function openPDF(day) {
+      pdfFrame.src = `Day_${day}.pdf`;
+      viewer.classList.add("active");
+    }
+
+    function closeViewer() {
+      pdfFrame.src = "";
+      viewer.classList.remove("active");
+    }
+
+    viewer.addEventListener("click", e => {
+      if (e.target === viewer) closeViewer();
+    });
+
+    search.addEventListener("input", () => {
+      const value = search.value.trim();
+      cards.forEach(card => {
+        card.style.display = !value || card.dataset.day.includes(value)
+          ? "block"
+          : "none";
+      });
+    });
+
+    buildGrid();
+  </script>
+
+</body>
+</html>
